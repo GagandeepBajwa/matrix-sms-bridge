@@ -24,7 +24,7 @@ class VoipSmsProvider(
     suspend fun sendOutFailedMessages() {
         if (outSmsMessageRepository.count() > 0L) {
             outSmsMessageRepository.findAll().collect {
-                sendOutSmsMessageRequest(AndroidOutSmsMessageRequest(it.receiver, it.body))
+                sendOutSmsMessageRequest(it.receiver, it.body)
                 outSmsMessageRepository.delete(it)
             }
             if (smsBridgeProperties.defaultRoomId != null) {

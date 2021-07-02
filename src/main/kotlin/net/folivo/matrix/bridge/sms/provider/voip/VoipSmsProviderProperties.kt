@@ -3,7 +3,7 @@ package net.folivo.matrix.bridge.sms.provider.voip
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
-ConfigurationProperties("matrix.bridge.sms.provider.voip")
+
 @ConstructorBinding
 data class VoipSmsProviderProperties(
     val enabled: Boolean = false,

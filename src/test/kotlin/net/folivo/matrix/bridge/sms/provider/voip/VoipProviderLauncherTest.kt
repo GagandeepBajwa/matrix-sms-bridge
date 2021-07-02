@@ -22,9 +22,9 @@ private fun testBody(): DescribeSpec.() -> Unit {
                 .returns(EventId("event", "server"))
         }
 
-        val cut = AndroidSmsProviderLauncher(voipSmsProviderMock, smsBridgePropertiesMock, matrixClientMock)
+        val cut = VoipSmsProviderLauncher(voipSmsProviderMock, smsBridgePropertiesMock, matrixClientMock)
 
-        describe(AndroidSmsProviderLauncher::startReceiveLoop.name) {
+        describe(VoipSmsProviderLauncher::startReceiveLoop.name) {
             describe("on error") {
                 describe("default room given") {
                     val defaultRoom = RoomId("default", "server")

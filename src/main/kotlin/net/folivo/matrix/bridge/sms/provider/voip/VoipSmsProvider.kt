@@ -1,9 +1,24 @@
 package net.folivo.matrix.bridge.sms.provider.voip
 
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.reactive.awaitFirstOrNull
+import net.folivo.matrix.bridge.sms.SmsBridgeProperties
+import net.folivo.matrix.bridge.sms.handler.ReceiveSmsService
+import net.folivo.matrix.bridge.sms.provider.SmsProvider
+import net.folivo.matrix.bridge.sms.provider.voip.VoipInSmsMessagesResponse
+import net.folivo.matrix.bridge.sms.provider.voip.VoipSmsProcessed
+import net.folivo.matrix.bridge.sms.provider.voip.VoipSmsProvider
+import net.folivo.matrix.core.model.events.m.room.message.NoticeMessageEventContent
+import net.folivo.matrix.restclient.MatrixClient
+import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus.BAD_REQUEST
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.awaitBody
+
 class VoipSmsProvider(
     private val receiveSmsService: ReceiveSmsService,
-    private val processedRepository: AndroidSmsProcessedRepository,
-    private val outSmsMessageRepository: AndroidOutSmsMessageRepository,
+    private val processedRepository: VoipSmsProcessedRepository,
+    private val outSmsMessageRepository: VoipOutSmsMessageRepository,
     private val webClient: WebClient,
     private val matrixClient: MatrixClient,
     private val smsBridgeProperties: SmsBridgeProperties
@@ -17,7 +32,7 @@ class VoipSmsProvider(
         try{
             sendOutMessageRequest(receiver, body)
         }catch(error:Throwable){
-            LOg.error("could not send message to voip message gateway: ${error.message}");
+            Log.error("could not send message to voip message gateway: ${error.message}");
         }
     }
 
@@ -43,8 +58,8 @@ class VoipSmsProvider(
         LOG.debug("send out sms message via android was successful")
     }
 
-    private suspend fun getAndProcessNewMessages(){
-        LOG.debug("request new messages")
+    suspend fun getAndProcessNewMessages() {
+        AndroidSmsProvider.LOG.debug("request new messages")
         val lastProcessed = processedRepository.findById(1)
         val response = webClient.get().uri {
             it.apply {
@@ -62,15 +77,15 @@ class VoipSmsProvider(
                 try {
                     if (answer != null) sendSms(message.sender, answer)
                 } catch (error: Throwable) {
-                    LOG.error("could not answer ${message.sender} with message $answer. Reason: ${error.message}")
-                    LOG.debug("details:", error)
+                    VoipSmsProvider.LOG.error("could not answer ${message.sender} with message $answer. Reason: ${error.message}")
+                    VoipSmsProvider.LOG.debug("details:", error)
                 }
                 processedRepository.save(
                     process?.copy(lastProcessedId = message.id)
-                        ?: AndroidSmsProcessed(1, message.id)
+                        ?: VoipSmsProcessed(1, message.id)
                 )
             })
-        LOG.debug("processed new messages")
+        VoipSmsProvider.LOG.debug("processed new messages")
     }
 }
 

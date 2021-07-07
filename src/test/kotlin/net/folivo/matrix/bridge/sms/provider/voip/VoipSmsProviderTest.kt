@@ -43,7 +43,7 @@ import org.springframework.http.HttpStatus
         "matrix.bridge.sms.provider.voip.password=password"
     ]
 )
-class AndroidSmsProviderTest(
+class VoipSmsProviderTest(
     db: R2dbcEntityTemplate,
     @MockkBean(relaxed = true)
     private val receiveSmsServiceMock: ReceiveSmsService,

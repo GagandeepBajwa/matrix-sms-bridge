@@ -30,16 +30,16 @@ class VoipSmsProvider(
 
     override suspend fun sendSms(receiver: String, body: String) {
         try{
-            sendOutMessageRequest(receiver, body)
+            sendOutSmsMessageRequest(VoipOutSmsMessageRequest(receiver, body))
         }catch(error:Throwable){
-            Log.error("could not send message to voip message gateway: ${error.message}");
+            //Log.error("could not send message to voip message gateway: ${error.message}");
         }
     }
 
     suspend fun sendOutFailedMessages() {
         if (outSmsMessageRepository.count() > 0L) {
             outSmsMessageRepository.findAll().collect {
-                sendOutSmsMessageRequest(it.receiver, it.body)
+                sendOutSmsMessageRequest(VoipOutSmsMessageRequest(it.receiver, it.body))
                 outSmsMessageRepository.delete(it)
             }
             if (smsBridgeProperties.defaultRoomId != null) {
@@ -51,7 +51,7 @@ class VoipSmsProvider(
         }
     }
 
-    private suspend fun sendOutMessageRequest(receiver: String, body:String){
+    private suspend fun sendOutSmsMessageRequest(message: VoipOutSmsMessageRequest){
         LOG.debug("start send out sms message via android")
         webClient.post().uri("/messages/out").bodyValue(message)
             .retrieve().toBodilessEntity().awaitFirstOrNull()
@@ -59,14 +59,14 @@ class VoipSmsProvider(
     }
 
     suspend fun getAndProcessNewMessages() {
-        AndroidSmsProvider.LOG.debug("request new messages")
+        VoipSmsProvider.LOG.debug("request new messages")
         val lastProcessed = processedRepository.findById(1)
         val response = webClient.get().uri {
             it.apply {
                 path("/messages/in")
                 if (lastProcessed != null) queryParam("after", lastProcessed.lastProcessedId)
             }.build()
-        }.retrieve().awaitBody<AndroidInSmsMessagesResponse>()
+        }.retrieve().awaitBody<VoipInSmsMessagesResponse>()
         response.messages
             .sortedBy { it.id }
             .fold(lastProcessed, { process, message ->

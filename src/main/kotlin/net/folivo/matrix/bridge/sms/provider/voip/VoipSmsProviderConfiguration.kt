@@ -83,7 +83,7 @@ class VoipSmsProviderConfiguration(private val properties: VoipSmsProviderProper
         matrixClient: MatrixClient,
         smsBridgeProperties: SmsBridgeProperties
     ): VoipSmsProvider {
-        return AndroidSmsProvider(
+        return VoipSmsProvider(
             receiveSmsService,
             processedRepository,
             outSmsMessageRepository,

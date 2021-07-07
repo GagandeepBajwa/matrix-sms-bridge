@@ -1,0 +1,31 @@
+version: '3.3'
+services:
+  matrix-sms-bridge:
+    image: folivonet/matrix-sms-bridge:latest
+    volumes:
+      - type: bind
+        source: ./config
+        target: /config
+      - type: bind
+        source: ./data
+        target: /data
+    environment:
+      - SPRING_CONFIG_ADDITIONAL_LOCATION=/config/application.yml
+      #- SPRING_PROFILES_ACTIVE=initialsync
+    expose:
+      - 8080
+    restart: on-failure
+  matrix-synapse:
+    image: matrixdotorg/synapse:latest
+    volumes:
+      - type: bind
+        source: ./synapse
+        target: /data
+    environment:
+      - SYNAPSE_REPORT_STATS=false
+      - UID=1000
+      - GID=1000
+    depends_on:
+      - matrix-sms-bridge
+    ports:
+      - 8008:8008

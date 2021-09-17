@@ -7,7 +7,7 @@ matrix:
     sms:
       provider:
         android:
-          enabled: true
+          enabled: false
           baseUrl: https://192.168.25.26:9090
           username: admin
           password: 123
@@ -17,6 +17,9 @@ matrix:
             type: PKCS12
         voip:
           enabled: true
+          api_url: https://voip.ms/api/v1/rest.php
+          api_username: bajwag1798@gmail.com
+          api_password: Gaganvoip17:)
       defaultRoomId: "!tRraLABExGeUDmOWvF:matrix-local"
       defaultRegion: DE
       defaultTimeZone: Europe/Berlin
